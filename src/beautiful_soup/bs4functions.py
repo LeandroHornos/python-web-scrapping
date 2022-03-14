@@ -1,6 +1,9 @@
 from bs4 import BeautifulSoup
+import re
 
-# getAccordionInfo(accordion, split_tag="str")
+# getAccordionInfo(accordion: bs4_obj, split_tag: string)
+# --------------------------------------------
+
 
 # This function gets the beautifulsoup object containing the accordion code. 
 # The accordion is a component present in the course overview wich is used 
@@ -44,7 +47,12 @@ def getAccordionInfo(accordion, split_tag="<h3>Testimonials</h3>"):
     
     return data
 
+# getDescriptionInfo(description:bs4_obj)
+# ---------------------------------------
 
+# This function extracts the info from the description box of the website
+# it gets the dates and times of the classes, the mode (online or irl)
+# and a short pictch describing what the course is about.
 
 def getDescriptionInfo(description):
     #config
@@ -78,4 +86,37 @@ def getDescriptionInfo(description):
             dates.append(p.text.strip().replace(u'\xa0', "").replace("th","th;"))
     return({"dates":dates, "mode":mode, "pitch": pitch})
 
-    
+
+# getFeeInfo(soup:bs4_obj):
+# --------------------------------
+
+# This function takes a code soup and identifies the
+# div that contains the fee info, and then extracts it
+# using the getPrice(price:bs4_obj) function
+
+def getPrice(price):
+    value = None
+    match = re.match("^\£?\$?\d+\.\d+", price.text)
+    if(match):
+        value = match.group(0)
+    return {"price": value[1:], "currency": value[0] }
+
+
+def getFeeInfo(soup):
+    no_result = {"price": None, "currency": None}
+    boxes = soup.find_all("div", class_="box")
+    box = None
+    for div in boxes:
+        if(div.h3):
+            if div.h3.text.upper() == "FEE INFO":
+                box = div
+    if not box:
+        return no_result
+    price = box.find("span", class_="price")
+    if not price:
+         return no_result
+    value = None
+    match = re.match("^\£?\$?\d+\.\d+", price.text)
+    if match:
+        value = match.group(0)
+    return {"price": value[1:], "currency": value[0] }
