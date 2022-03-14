@@ -60,6 +60,7 @@ def getAccordionInfo(soup, split_tag="<h3>Testimonials</h3>"):
 # it gets the dates and times of the classes, the mode (online or irl)
 # and a short pictch describing what the course is about.
 
+
 def getDescriptionInfo(soup):
     description = soup.find(class_="description")
     #config
@@ -70,9 +71,9 @@ def getDescriptionInfo(soup):
          {"old": "</strong>", "new": ""},]
      
     # Get the raw data from the description html
-    mode = description.find_all("p")[1].find("strong").text.lower()
-    raw_pitch = description.find_all("p")[3:]
-    raw_dates = description.find_all("p")[2]
+
+    raw_pitch = description.find_all("p")
+
     
     # Unify the pitch in one single text
     pitch = ""
@@ -80,17 +81,7 @@ def getDescriptionInfo(soup):
         pitch = pitch + " " + p.text
     pitch = pitch.strip()
     
-    # Format the dates
-    dates=[]
-    dates_str = str(raw_dates)
-    for change in tag_changes:
-        dates_str = dates_str.replace(change["old"],change["new"])
-    date_ps = BeautifulSoup(dates_str, "html.parser")
-
-    for p in date_ps:
-        if p.text.strip() != "":
-            dates.append(p.text.strip().replace(u'\xa0', "").replace("rd","rd;").replace("th","th;"))
-    return({"dates":dates, "mode":mode, "pitch": pitch})
+    return({"pitch": pitch})
 
 
 # getFeeInfo(soup:bs4_obj):
