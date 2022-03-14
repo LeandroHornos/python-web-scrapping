@@ -2,11 +2,18 @@ from bs4 import BeautifulSoup
 import re
 
 
-def getTitle(soup):
-    title = None
-    main_item = soup.find("div", class_="main-item")
-    title = main_item.h1.text
-    return {"title": title}
+def getHeader(soup):
+    try:
+        main_item = soup.find("div", class_="main-item")
+        for match in main_item.find_all("span", class_="title"):
+            match.replaceWith("")
+        title = main_item.h1.text.capitalize().strip()
+        date = main_item.find("p", "date").text.strip()
+        location = main_item.find("p", "location").text.strip()
+        return {"title": title, "date": date, "location": location}
+    except Exception as e:
+        print("Header information could not be scrapped:\n", e)
+        return {"title": None, "date": None, "location": None}
 
 
 # getAccordionInfo(soup: bs4_obj, split_tag: string)
@@ -124,10 +131,10 @@ def getFeeInfo(soup):
 
 def scrapCourse(soup):
     # Scrap all data
-    title = getTitle(soup)
+    header = getHeader(soup)
     information = getAccordionInfo(soup)
     description = getDescriptionInfo(soup)
     fee = getFeeInfo(soup)
     # Merge all in a single dictionary
-    data = title | information | description | fee
+    data = header | information | description | fee
     return data
