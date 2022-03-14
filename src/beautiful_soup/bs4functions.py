@@ -3,8 +3,8 @@ from bs4 import BeautifulSoup
 # getAccordionInfo(accordion, split_tag="str")
 
 # This function gets the beautifulsoup object containing the accordion code. 
-# # The accordion is a component present in the course overview wich is used 
-# # to display basic information about the course, splited in cards containing 
+# The accordion is a component present in the course overview wich is used 
+# to display basic information about the course, splited in cards containing 
 # a title and the info. At the end of the accordion there is info that is not 
 # relevant and therefore that part of the code has to be removed. 
 # The function receives a substring that indicates where to cut the code
@@ -45,6 +45,7 @@ def getAccordionInfo(accordion, split_tag="<h3>Testimonials</h3>"):
     return data
 
 
+
 def getDescriptionInfo(description):
     #config
     tag_changes = [{"old":"<br/>", "new":"" },
@@ -53,17 +54,28 @@ def getDescriptionInfo(description):
          {"old": "<strong>", "new": "</p><p>"},
          {"old": "</strong>", "new": ""},]
      
+    # Get the raw data from the description html
     mode = description.find_all("p")[1].find("strong").text.lower()
-    dates = []
+    raw_pitch = description.find_all("p")[3:]
     raw_dates = description.find_all("p")[2]
+    
+    # Unify the pitch in one single text
+    pitch = ""
+    for p in raw_pitch:
+        pitch = pitch + " " + p.text
+    pitch = pitch.strip()
+    
+    # Format the dates
+    dates=[]
     dates_str = str(raw_dates)
     for change in tag_changes:
         dates_str = dates_str.replace(change["old"],change["new"])
     date_ps = BeautifulSoup(dates_str, "html.parser")
 
     for p in date_ps:
+        print(type(dates))
         if p.text.strip() != "":
-            dates.append(date.strip().replace(u'\xa0', "").replace("th","th;"))
-    return({"dates":dates, "mode":mode})
+            dates.append(p.text.strip().replace(u'\xa0', "").replace("th","th;"))
+    return({"dates":dates, "mode":mode, "pitch": pitch})
 
     
