@@ -89,7 +89,7 @@ def getDescriptionInfo(soup):
 
     for p in date_ps:
         if p.text.strip() != "":
-            dates.append(p.text.strip().replace(u'\xa0', "").replace("th","th;"))
+            dates.append(p.text.strip().replace(u'\xa0', "").replace("rd","rd;").replace("th","th;"))
     return({"dates":dates, "mode":mode, "pitch": pitch})
 
 
