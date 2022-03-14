@@ -119,12 +119,19 @@ def getFeeInfo(soup):
     return {"price": value[1:], "currency": value[0] }
 
 
+# scrapCourse(soup:bs4_obj):
+# --------------------------------
+
+# This function calls all the other functions
+# in order to completely scrap all the info
+# in a course overview page, feeded as a bs4 object
+
 def scrapCourse(soup):
     #Scrap all data
     title = getTitle(soup)
     information = getAccordionInfo(soup)
     description = getDescriptionInfo(soup)
     fee = getFeeInfo(soup)
-    # Merge all in a dictionary
+    # Merge all in a single dictionary
     data = title | information | description | fee
     return data
