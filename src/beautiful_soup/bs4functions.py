@@ -47,12 +47,11 @@ def getAccordionInfo(soup, split_tag="<h3>Testimonials</h3>"):
         new_divs.append(code)
         
     # Prepare data and return it
-    data = []
-
+    data = {}
     for i in range(len(titles)):
-        data.append({"title":titles[i].text, "content":new_divs[i].text})
+        data[titles[i].text.lower().replace(" ", "-").replace("'","")] = new_divs[i].text      
     
-    return {"information": data}
+    return data
 
 # getDescriptionInfo(soup:bs4_obj)
 # ---------------------------------------
