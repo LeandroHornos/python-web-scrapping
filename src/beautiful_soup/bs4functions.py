@@ -52,7 +52,7 @@ def getAccordionInfo(soup, split_tag="<h3>Testimonials</h3>"):
     for i in range(len(titles)):
         data.append({"title":titles[i].text, "content":new_divs[i].text})
     
-    return data
+    return {"information": data}
 
 # getDescriptionInfo(soup:bs4_obj)
 # ---------------------------------------
@@ -99,15 +99,6 @@ def getDescriptionInfo(soup):
 
 # This function takes a code soup and identifies the
 # div that contains the fee info, and then extracts it
-# using the getPrice(price:bs4_obj) function
-
-def getPrice(price):
-    value = None
-    match = re.match("^\£?\$?\d+\.\d+", price.text)
-    if(match):
-        value = match.group(0)
-    return {"price": value[1:], "currency": value[0] }
-
 
 def getFeeInfo(soup):
     no_result = {"price": None, "currency": None}
@@ -127,3 +118,14 @@ def getFeeInfo(soup):
     if match:
         value = match.group(0)
     return {"price": value[1:], "currency": value[0] }
+
+
+def scrapCourse(soup):
+    #Scrap all data
+    title = getTitle(soup)
+    information = getAccordionInfo(soup)
+    description = getDescriptionInfo(soup)
+    fee = getFeeInfo(soup)
+    # Merge all in a dictionary
+    data = title | information | description | fee
+    return data
