@@ -1,7 +1,13 @@
 from bs4 import BeautifulSoup
 import re
 
-# getAccordionInfo(accordion: bs4_obj, split_tag: string)
+def getTitle(soup):
+    title = None
+    main_item = soup.find("div", class_="main-item")
+    title = main_item.h1.text
+    return({"title": title})
+
+# getAccordionInfo(soup: bs4_obj, split_tag: string)
 # --------------------------------------------
 
 
@@ -12,7 +18,8 @@ import re
 # relevant and therefore that part of the code has to be removed. 
 # The function receives a substring that indicates where to cut the code
 
-def getAccordionInfo(accordion, split_tag="<h3>Testimonials</h3>"):
+def getAccordionInfo(soup, split_tag="<h3>Testimonials</h3>"):
+    accordion = soup.find(id="accordion")
     #config
     changes = [{"old":"<li>", "new":"" },
          {"old": "</li>","new": ". "},
@@ -47,14 +54,15 @@ def getAccordionInfo(accordion, split_tag="<h3>Testimonials</h3>"):
     
     return data
 
-# getDescriptionInfo(description:bs4_obj)
+# getDescriptionInfo(soup:bs4_obj)
 # ---------------------------------------
 
 # This function extracts the info from the description box of the website
 # it gets the dates and times of the classes, the mode (online or irl)
 # and a short pictch describing what the course is about.
 
-def getDescriptionInfo(description):
+def getDescriptionInfo(soup):
+    description = soup.find(class_="description")
     #config
     tag_changes = [{"old":"<br/>", "new":"" },
          {"old": "|","new": ""},
@@ -81,7 +89,6 @@ def getDescriptionInfo(description):
     date_ps = BeautifulSoup(dates_str, "html.parser")
 
     for p in date_ps:
-        print(type(dates))
         if p.text.strip() != "":
             dates.append(p.text.strip().replace(u'\xa0', "").replace("th","th;"))
     return({"dates":dates, "mode":mode, "pitch": pitch})
