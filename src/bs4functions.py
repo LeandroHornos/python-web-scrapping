@@ -204,4 +204,10 @@ def scrapCourses(links, pause=1):
     print("Scraping done!")
     return {"courses": courses, "errors": errors}
 
+def crawlScientificUpdate(start_url):
+    links = getCoursesLinks(start_url, pause=5)
+    data = scrapCourses(links, pause=5)
+    print("We have obtained the info of "+ str(len(data["courses"])) +" courses")
+    print("Errors ocurred in"+ str(len(data["errors"])) +" links")
+    return data
 
