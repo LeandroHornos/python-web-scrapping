@@ -1,5 +1,7 @@
 from bs4 import BeautifulSoup
 import re
+import time
+import requests
 
 
 def getHeader(soup):
@@ -138,3 +140,68 @@ def scrapCourse(soup):
     # Merge all in a single dictionary
     data = header | information | description | fee
     return data
+
+
+def getLinksByClass(soup, className=""):
+    urls = []
+    if className == "":
+        links = soup.find_all("a")
+    else:
+        links = soup.find_all("a", class_=className)
+    for link in links:
+        urls.append(link["href"])
+    return urls
+
+def getCoursesLinks(start_url, pause=1):
+    # In this list we will store the courses links
+    links = []
+    try:
+        # Load the first page
+        page = requests.get(start_url)
+        content = page.text
+        soup = BeautifulSoup(content, "lxml")
+        # get urls from page numbers links
+        next_pages = getLinksByClass(soup.find("div", class_="pagenumbers"))
+        print("Getting links from first page...")
+        links = getLinksByClass(soup, "view-details")
+        # Set a timeout between calls to avoid being banned
+        time.sleep(pause)
+        # Load the other pages and get the urls from courses linlks
+        for url in next_pages:
+            print("Getting links from next page...")
+            page = requests.get(url)
+            content = page.text
+            soup = BeautifulSoup(content, "lxml")
+            new_links = getLinksByClass(soup, "view-details")
+            links = [*links, *new_links]
+            # Set a timeout between calls to avoid being banned
+            time.sleep(pause)
+        print("Done!")
+        return links
+    except Exception as e:
+        print("An error has occured when trying to retrieve the data", e)
+        return []
+
+
+def scrapCourses(links, pause=1):
+    errors = []
+    courses = []
+    print("Scrapping started")
+    for link in links:
+        try:
+            print(f"Scraping {link}...")
+            result = requests.get(link)
+            content = result.text
+            soup = BeautifulSoup(content, "lxml")
+            data = scrapCourse(soup)
+            data["link"] = link
+            courses.append(data)
+            time.sleep(pause)
+        except Exception as e:
+            print("Something went wrong with this url", e)
+            errors.append({"link":link, "msg": e})
+            continue
+    print("Scraping done!")
+    return {"courses": courses, "errors": errors}
+
+
